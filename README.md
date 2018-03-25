@@ -1,6 +1,6 @@
 # Golang SDK for [bitmex](https://www.bitmex.com)
 
-inspired by [https://github.com/BitMEX/api-connectors](https://github.com/BitMEX/api-connectors), [https://www.bitmex.com/api/explorer](https://www.bitmex.com/api/explorer) and [https://github.com/jxc6698/bitcoin-exchange-api](https://github.com/jxc6698/bitcoin-exchange-api)
+implementation of [https://github.com/BitMEX/api-connectors](https://github.com/BitMEX/api-connectors), [https://www.bitmex.com/api/explorer](https://www.bitmex.com/api/explorer)
 
 all structs and APIs are from the bitmex official api connectors, based on that, add authentication and fix bugs.
 
