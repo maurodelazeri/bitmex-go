@@ -156,7 +156,3 @@ if err != nil {
 log.Println(response.Status)
 log.Printf("%+v\n", chat)
 ```
-
-## Roadmap
-* I only tested some API I will use, in the near future, I will keep adding and fixing to make more API available.
-* make a PR to bitmex api collectors to generate a ready to use golang client.
