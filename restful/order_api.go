@@ -169,11 +169,9 @@ func (o *OrderApi) StopLimitAmend(symbol string, orderQty float64, price float64
 	}
 
 	params := map[string]interface{}{
-		"symbol":   symbol,
-		"orderQty": float32(orderQty),
-		"price":    price,
-		"stopPx":   stopPx,
-		"orderID":  OrderID,
+		"price":   price,
+		"stopPx":  stopPx,
+		"orderID": OrderID,
 	}
 
 	order, response, err := o.swaggerOrderApi.OrderAmend(o.ctx, params)
