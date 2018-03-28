@@ -157,7 +157,7 @@ func (o *OrderApi) StopLimit(symbol string, orderQty float64, price float64, sto
 }
 
 // StopLimitAmend change a current order in place
-func (o *OrderApi) StopLimitAmend(symbol string, orderQty float64, price float64, stopPx float64, OrderID string) (resp *http.Response, orderId string, err error) {
+func (o *OrderApi) SetAmendOrder(symbol string, orderQty float64, price float64, stopPx float64, OrderID string) (resp *http.Response, orderId string, err error) {
 	if symbol == "" {
 		return nil, "", errors.New("symbol can NOT be empty")
 	}
@@ -176,6 +176,43 @@ func (o *OrderApi) StopLimitAmend(symbol string, orderQty float64, price float64
 
 	order, response, err := o.swaggerOrderApi.OrderAmend(o.ctx, params)
 
+	if err != nil || response.StatusCode != 200 {
+		return response, order.OrderID, err
+	}
+	return response, order.OrderID, nil
+}
+
+// TakeProfit
+func (o *OrderApi) TakeProfit(symbol string, orderQty float64, price float64, stopPx float64, clientOrderIDPrefix string, positionSide string) (resp *http.Response, orderId string, err error) {
+	if symbol == "" {
+		return nil, "", errors.New("symbol can NOT be empty")
+	}
+	if price <= 0 {
+		return nil, "", errors.New("price must be positive")
+	}
+	clOrdID := ""
+	if clientOrderIDPrefix != "" {
+		s := strings.Replace(base64.StdEncoding.EncodeToString(uuid.NewV4().Bytes()), "=", "", -1)
+		clOrdID = clientOrderIDPrefix + s
+	}
+
+	var amount float32
+
+	if positionSide == "Buy" {
+		amount = float32(-orderQty)
+	} else {
+		amount = float32(orderQty)
+	}
+
+	params := map[string]interface{}{
+		"symbol":   symbol,
+		"orderQty": amount,
+		"price":    price,
+		"stopPx":   stopPx,
+		"clOrdID":  clOrdID,
+		"ordType":  "LimitIfTouched",
+	}
+	order, response, err := o.swaggerOrderApi.OrderNew(o.ctx, symbol, params)
 	if err != nil || response.StatusCode != 200 {
 		return response, order.OrderID, err
 	}
