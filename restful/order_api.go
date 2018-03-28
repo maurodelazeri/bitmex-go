@@ -136,7 +136,7 @@ func (o *OrderApi) StopLimit(symbol string, orderQty float64, price float64, sto
 
 	var amount float32
 
-	if positionSide == "Sell" {
+	if positionSide == "Buy" {
 		amount = float32(-orderQty)
 	} else {
 		amount = float32(orderQty)
@@ -150,6 +150,34 @@ func (o *OrderApi) StopLimit(symbol string, orderQty float64, price float64, sto
 		"clOrdID":  clOrdID,
 	}
 	order, response, err := o.swaggerOrderApi.OrderNew(o.ctx, symbol, params)
+	if err != nil || response.StatusCode != 200 {
+		return response, order.OrderID, err
+	}
+	return response, order.OrderID, nil
+}
+
+// StopLimitAmend change a current order in place
+func (o *OrderApi) StopLimitAmend(symbol string, orderQty float64, price float64, stopPx float64, OrderID string) (resp *http.Response, orderId string, err error) {
+	if symbol == "" {
+		return nil, "", errors.New("symbol can NOT be empty")
+	}
+	if OrderID == "" {
+		return nil, "", errors.New("oderID can NOT be empty")
+	}
+	if price <= 0 {
+		return nil, "", errors.New("price must be positive")
+	}
+
+	params := map[string]interface{}{
+		"symbol":   symbol,
+		"orderQty": float32(orderQty),
+		"price":    price,
+		"stopPx":   stopPx,
+		"orderID":  OrderID,
+	}
+
+	order, response, err := o.swaggerOrderApi.OrderAmend(o.ctx, params)
+
 	if err != nil || response.StatusCode != 200 {
 		return response, order.OrderID, err
 	}
