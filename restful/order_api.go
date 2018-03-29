@@ -211,7 +211,7 @@ func (o *OrderApi) TakeProfit(symbol string, orderQty float64, price float64, st
 		"price":    price,
 		"stopPx":   stopPx,
 		"clOrdID":  clOrdID,
-		"ordType":  "LimitIfTouched",
+		"ordType":  "StopLimit",
 	}
 	order, response, err := o.swaggerOrderApi.OrderNew(o.ctx, symbol, params)
 	if err != nil || response.StatusCode != 200 {
