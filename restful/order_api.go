@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/maurodelazeri/bitmex-go/swagger"
 	"github.com/satori/go.uuid"
@@ -217,4 +218,29 @@ func (o *OrderApi) TakeProfit(symbol string, orderQty float64, price float64, st
 		return response, order.OrderID, err
 	}
 	return response, order.OrderID, nil
+}
+
+// GetAllordersHistory returns the orders history
+func (o *OrderApi) GetAllordersHistory(symbol string, filter string, count float32, reverse bool, startTime time.Time, endTime time.Time) (resp *http.Response, order []swagger.Order, err error) {
+
+	var orderHistory []swagger.Order
+
+	if symbol == "" {
+		return nil, orderHistory, errors.New("symbol can NOT be empty")
+	}
+
+	params := map[string]interface{}{
+		"symbol":    symbol,
+		"count":     count,
+		"reverse":   reverse,
+		"startTime": startTime,
+		"endTime":   endTime,
+	}
+
+	orders, response, err := o.swaggerOrderApi.OrderGetOrders(o.ctx, params)
+	if err != nil || response.StatusCode != 200 {
+		return response, order, err
+	}
+
+	return response, orders, nil
 }
