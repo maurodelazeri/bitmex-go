@@ -22,12 +22,12 @@ func NewOrderApi(swaggerOrderApi *swagger.OrderApiService, ctx context.Context) 
 }
 
 // BUY
-func (o *OrderApi) LimitBuy(symbol string, orderQty float64, price float64, clientOrderIDPrefix string) (resp *http.Response, orderId string, err error) {
+func (o *OrderApi) LimitBuy(symbol string, orderQty int, price float64, clientOrderIDPrefix string) (resp *http.Response, order swagger.Order, err error) {
 	if symbol == "" {
-		return nil, "", errors.New("symbol can NOT be empty")
+		return nil, swagger.Order{}, errors.New("symbol can NOT be empty")
 	}
 	if price <= 0 {
-		return nil, "", errors.New("price must be positive")
+		return nil, swagger.Order{}, errors.New("price must be positive")
 	}
 	clOrdID := ""
 	if clientOrderIDPrefix != "" {
@@ -44,14 +44,14 @@ func (o *OrderApi) LimitBuy(symbol string, orderQty float64, price float64, clie
 	}
 	order, response, err := o.swaggerOrderApi.OrderNew(o.ctx, symbol, params)
 	if err != nil || response.StatusCode != 200 {
-		return response, order.OrderID, err
+		return response, order, err
 	}
-	return response, order.OrderID, nil
+	return response, order, nil
 }
 
-func (o *OrderApi) MarketBuy(symbol string, orderQty float64, clientOrderIDPrefix string) (resp *http.Response, orderId string, err error) {
+func (o *OrderApi) MarketBuy(symbol string, orderQty int, clientOrderIDPrefix string) (resp *http.Response, order swagger.Order, err error) {
 	if symbol == "" {
-		return nil, "", errors.New("symbol can NOT be empty")
+		return nil, swagger.Order{}, errors.New("symbol can NOT be empty")
 	}
 	clOrdID := ""
 	if clientOrderIDPrefix != "" {
@@ -67,18 +67,18 @@ func (o *OrderApi) MarketBuy(symbol string, orderQty float64, clientOrderIDPrefi
 	}
 	order, response, err := o.swaggerOrderApi.OrderNew(o.ctx, symbol, params)
 	if err != nil || response.StatusCode != 200 {
-		return response, order.OrderID, err
+		return response, order, err
 	}
-	return response, order.OrderID, nil
+	return response, order, nil
 }
 
 // SELL
-func (o *OrderApi) LimitSell(symbol string, orderQty float64, price float64, clientOrderIDPrefix string) (resp *http.Response, orderId string, err error) {
+func (o *OrderApi) LimitSell(symbol string, orderQty int, price float64, clientOrderIDPrefix string) (resp *http.Response, order swagger.Order, err error) {
 	if symbol == "" {
-		return nil, "", errors.New("symbol can NOT be empty")
+		return nil, swagger.Order{}, errors.New("symbol can NOT be empty")
 	}
 	if price <= 0 {
-		return nil, "", errors.New("price must be positive")
+		return nil, swagger.Order{}, errors.New("price must be positive")
 	}
 	clOrdID := ""
 	if clientOrderIDPrefix != "" {
@@ -94,14 +94,14 @@ func (o *OrderApi) LimitSell(symbol string, orderQty float64, price float64, cli
 	}
 	order, response, err := o.swaggerOrderApi.OrderNew(o.ctx, symbol, params)
 	if err != nil || response.StatusCode != 200 {
-		return response, order.OrderID, err
+		return response, order, err
 	}
-	return response, order.OrderID, nil
+	return response, order, nil
 }
 
-func (o *OrderApi) MarketSell(symbol string, orderQty float64, clientOrderIDPrefix string) (resp *http.Response, orderId string, err error) {
+func (o *OrderApi) MarketSell(symbol string, orderQty int, clientOrderIDPrefix string) (resp *http.Response, order swagger.Order, err error) {
 	if symbol == "" {
-		return nil, "", errors.New("symbol can NOT be empty")
+		return nil, swagger.Order{}, errors.New("symbol can NOT be empty")
 	}
 	clOrdID := ""
 	if clientOrderIDPrefix != "" {
@@ -116,18 +116,18 @@ func (o *OrderApi) MarketSell(symbol string, orderQty float64, clientOrderIDPref
 	}
 	order, response, err := o.swaggerOrderApi.OrderNew(o.ctx, symbol, params)
 	if err != nil || response.StatusCode != 200 {
-		return response, order.OrderID, err
+		return response, order, err
 	}
-	return response, order.OrderID, nil
+	return response, order, nil
 }
 
-// StopLimit: Like a Stop Market, but enters a Limit order instead of a Market order. Specify an orderQty, stopPx, and price.
-func (o *OrderApi) StopLimit(symbol string, orderQty float64, price float64, stopPx float64, clientOrderIDPrefix string, positionSide string) (resp *http.Response, orderId string, err error) {
+// StopOrder: Like a Stop Market, but enters a Limit order instead of a Market order. Specify an orderQty, stopPx, and price.
+func (o *OrderApi) StopOrder(symbol string, orderQty int, price float64, stopPx float64, clientOrderIDPrefix string, positionSide string) (resp *http.Response, order swagger.Order, err error) {
 	if symbol == "" {
-		return nil, "", errors.New("symbol can NOT be empty")
+		return nil, swagger.Order{}, errors.New("symbol can NOT be empty")
 	}
 	if price <= 0 {
-		return nil, "", errors.New("price must be positive")
+		return nil, swagger.Order{}, errors.New("price must be positive")
 	}
 	clOrdID := ""
 	if clientOrderIDPrefix != "" {
@@ -137,7 +137,7 @@ func (o *OrderApi) StopLimit(symbol string, orderQty float64, price float64, sto
 
 	var amount float32
 
-	if positionSide == "Buy" {
+	if positionSide == "Sell" {
 		amount = float32(-orderQty)
 	} else {
 		amount = float32(orderQty)
@@ -146,27 +146,28 @@ func (o *OrderApi) StopLimit(symbol string, orderQty float64, price float64, sto
 	params := map[string]interface{}{
 		"symbol":   symbol,
 		"orderQty": amount,
-		"price":    price,
-		"stopPx":   stopPx,
-		"clOrdID":  clOrdID,
+		//"price":    price,
+		"stopPx":  stopPx,
+		"clOrdID": clOrdID,
+		"ordType": "Stop",
 	}
 	order, response, err := o.swaggerOrderApi.OrderNew(o.ctx, symbol, params)
 	if err != nil || response.StatusCode != 200 {
-		return response, order.OrderID, err
+		return response, order, err
 	}
-	return response, order.OrderID, nil
+	return response, order, nil
 }
 
 // StopLimitAmend change a current order in place
-func (o *OrderApi) SetAmendOrder(symbol string, orderQty float64, price float64, stopPx float64, OrderID string) (resp *http.Response, orderId string, err error) {
+func (o *OrderApi) SetAmendOrder(symbol string, orderQty int, price float64, stopPx float64, OrderID string) (resp *http.Response, order swagger.Order, err error) {
 	if symbol == "" {
-		return nil, "", errors.New("symbol can NOT be empty")
+		return nil, swagger.Order{}, errors.New("symbol can NOT be empty")
 	}
 	if OrderID == "" {
-		return nil, "", errors.New("oderID can NOT be empty")
+		return nil, swagger.Order{}, errors.New("oderID can NOT be empty")
 	}
 	if price <= 0 {
-		return nil, "", errors.New("price must be positive")
+		return nil, swagger.Order{}, errors.New("price must be positive")
 	}
 
 	params := map[string]interface{}{
@@ -178,9 +179,10 @@ func (o *OrderApi) SetAmendOrder(symbol string, orderQty float64, price float64,
 	order, response, err := o.swaggerOrderApi.OrderAmend(o.ctx, params)
 
 	if err != nil || response.StatusCode != 200 {
-		return response, order.OrderID, err
+		return response, order, err
 	}
-	return response, order.OrderID, nil
+
+	return response, order, nil
 }
 
 // TakeProfit
